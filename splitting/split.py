@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 
-def extract_exercise_number(submissions_file: str, exercise_names: list[str]):
+def extract_exercise_number(submissions_file: str, exercise_names: Iterable[str]):
     for ex_name in exercise_names:
         match = re.search(rf"{ex_name}[\s\-_]*(\d+)", os.path.basename(submissions_file))
         if match:
