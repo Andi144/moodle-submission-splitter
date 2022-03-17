@@ -35,6 +35,22 @@ def extract_weighted_tutors(tutors_list: Sequence[str]):
     return pd.DataFrame(tutors_list)
 
 
+def handle_duplicate_names(tutors_df: pd.DataFrame):
+    dup = tutors_df["name"].duplicated(keep=False)
+    dup_names = tutors_df["name"][dup]
+    # Create a count for each unique tutor name.
+    counts = dict()
+    
+    def update_and_get_count(name: str):
+        count = counts.get(name, 0)
+        count += 1
+        counts[name] = count
+        return count
+    
+    # Change DataFrame inplace.
+    tutors.loc[dup, "name"] = [f"{dn} ({update_and_get_count(dn)})" for dn in dup_names]
+
+
 def weighted_chunks(s: Sequence, weights: Iterable):
     # Scale weights to sum = 1.
     weights = np.array(weights, dtype=float) / sum(weights)
@@ -92,6 +108,8 @@ if len(tutors.columns) == 1:
 tutors.columns = ["name", "weight"]
 tutors["name"] = np.roll(tutors["name"], exercise_num)
 tutors["weight"] = np.roll(tutors["weight"], exercise_num)
+# Handle duplicate tutor names by simply adding increasing numbers after the name.
+handle_duplicate_names(tutors)
 
 unzip_dir = args.submissions_file + "_UNZIPPED"
 print(f"extracting submissions ZIP file to '{unzip_dir}'")
