@@ -19,7 +19,7 @@ def extract_exercise_number(submissions_file: str, exercise_names: list[str]):
     raise ValueError("could not automatically infer exercise number, must specify manually via '-n'")
 
 
-def extract_weighted_tutors(tutors_list: str):
+def extract_weighted_tutors(tutors_list: Sequence[str]):
     # Quick check to determine whether weights are specified.
     if "," in tutors_list[0]:
         rows = []
