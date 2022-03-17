@@ -54,14 +54,22 @@ def handle_duplicate_names(tutors_df: pd.DataFrame):
 def weighted_chunks(s: Sequence, weights: Iterable):
     # Scale weights to sum = 1.
     weights = np.array(weights, dtype=float) / sum(weights)
+    chunk_sizes = [math.floor(len(s) * w) for w in weights]
+    # Distribute the remaining elements evenly. Just repeatedly increase each
+    # chunk size by 1 until we distributed all remaining elements.
+    remainder_size = len(s) - sum(chunk_sizes)
+    idx = 0
+    while remainder_size > 0:
+        chunk_sizes[idx] += 1
+        idx = (idx + 1) % len(chunk_sizes)
+        remainder_size -= 1
+    assert sum(chunk_sizes) == len(s)
+    # Chunk sizes are all set, now simply collect each chunk from "s".
     chunks = []
     idx = 0
-    for w in weights[:-1]:
-        chunk_size = math.ceil(len(s) * w)
+    for chunk_size in chunk_sizes:
         chunks.append(s[idx:idx + chunk_size])
         idx += chunk_size
-    # For the last weight, simply use all remaining elements.
-    chunks.append(s[idx:])
     assert sum([len(c) for c in chunks]) == len(s)
     return chunks
 
