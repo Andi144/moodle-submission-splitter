@@ -89,7 +89,7 @@ parser.add_argument("--exercise_names", type=str, nargs="+",
                     help="List of case-sensitive exercise names which will be used to automatically infer the "
                          "exercise number from the Moodle ZIP filename. The number is assumed to follow one "
                          "of these names, separated by arbitrary whitespace characters, dashes or underscores. "
-                         "Default: ['assignment', 'exercise', 'UE', 'Übung', 'Aufgabe']")
+                         "Default: ['Assignment', 'Exercise', 'UE', 'Übung', 'Aufgabe']")
 tutors_group = parser.add_mutually_exclusive_group(required=True)
 tutors_group.add_argument("-tf", "--tutors_file", type=str,
                           help="File containing tutor names (one name per line, no header). Optionally, a second "
