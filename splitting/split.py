@@ -74,6 +74,10 @@ def weighted_chunks(s: Sequence, weights: Iterable):
     return chunks
 
 
+def get_file_path(path: str, absolute: bool):
+    return path if absolute else os.path.basename(path)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-sf", "--submissions_file", type=str, required=True,
                     help="Moodle ZIP file containing all submissions.")
@@ -101,6 +105,9 @@ tutors_group.add_argument("-tl", "--tutors_list", type=str, nargs="+",
                                "provided that contains weights per tutor that specify how the submission split sizes "
                                "should be distributed. If no weights are specified, then an equal split size "
                                "distribution is assumed.")
+parser.add_argument("--print_abs_paths", action="store_true",
+                    help="If specified, the printed output will show the absolute paths of all files. Otherwise, only "
+                         "the base filenames will be printed (default).")
 args = parser.parse_args()
 
 # If the number of the exercise is specified, use it. Otherwise, try to extract/infer it from the submission filename.
@@ -120,7 +127,7 @@ tutors["weight"] = np.roll(tutors["weight"], exercise_num)
 handle_duplicate_names(tutors)
 
 unzip_dir = args.submissions_file + "_UNZIPPED"
-print(f"extracting submissions ZIP file to '{unzip_dir}'")
+print(f"extracting submissions ZIP file to '{get_file_path(unzip_dir, args.print_abs_paths)}'")
 with zipfile.ZipFile(args.submissions_file, "r") as f:
     f.extractall(unzip_dir)
 submission_dirs = sorted(os.listdir(unzip_dir))
@@ -137,7 +144,7 @@ for i, chunk in enumerate(weighted_chunks(submission_dirs, tutors["weight"])):
             for file in glob(os.path.join(unzip_dir, submission_dir, "**"), recursive=True):
                 if os.path.isfile(file):
                     f.write(file, arcname=file[len(unzip_dir) + 1:])
-    print(f"[{i + 1}/{len(tutors)}] {len(chunk):3d} submissions ---> {chunk_file}")
+    print(f"[{i + 1}/{len(tutors)}] {len(chunk):3d} submissions ---> {get_file_path(chunk_file, args.print_abs_paths)}")
 
-print(f"deleting extracted submissions directory '{unzip_dir}'")
+print(f"deleting extracted submissions directory '{get_file_path(unzip_dir, args.print_abs_paths)}'")
 shutil.rmtree(unzip_dir, ignore_errors=True)
