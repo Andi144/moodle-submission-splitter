@@ -148,7 +148,7 @@ else:
 
 if args.submission_renaming_keys:
     name_format = args.submission_renaming_separator.join(f"<{k}>" for k in args.submission_renaming_keys)
-    print(f"Renaming submissions according to the following format: {name_format}")
+    print(f"renaming submissions according to the following format: {name_format}")
 
 print(f"distributing {len(submissions_df)} submissions among the following {len(tutors_df)} tutors:")
 print(tutors_df)
