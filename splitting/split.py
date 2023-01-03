@@ -46,6 +46,11 @@ tutors_group.add_argument("-tl", "--tutors_list", type=str, nargs="+",
 parser.add_argument("--print_abs_paths", action="store_true",
                     help="If specified, the printed output will show the absolute paths of all files. Otherwise, only "
                          "the base filenames will be printed (default).")
+parser.add_argument("--create_overview_file", action="store_true",
+                    help="If specified, an overview CSV file will be created that contains all information on the "
+                         "individual submissions and how they were distributed to the different tutors. This is useful "
+                         "to quickly check which tutor corrected which submission. The name of the overview file will "
+                         "be the same as '--submissions_file' but with the extension replaced with '.csv'.")
 parser.add_argument("--sorting_keys", type=str, nargs="+", default=[],
                     help="If specified, the submissions will be sorted according to these keys. The keys must be part "
                          "of the header entries in the '--info_file', so this argument must be specified in addition. "
@@ -152,9 +157,24 @@ if args.submission_renaming_keys:
     name_format = args.submission_renaming_separator.join(f"<{k}>" for k in args.submission_renaming_keys)
     print(f"renaming submissions according to the following format: {name_format}")
 
+if args.create_overview_file:
+    overview_file = os.path.splitext(args.submissions_file)[0] + ".csv"
+    print(f"storing overview file to '{get_file_path(overview_file, args.print_abs_paths)}'")
+else:
+    overview_file = None
+
 print(f"distributing {len(submissions_df)} submissions among the following {len(tutors_df)} tutors:")
 print(tutors_df)
 for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"])):
+    if args.create_overview_file:
+        assert overview_file is not None
+        chunk_df[["tutor_name", "tutor_weight"]] = tutors_df[["name", "weight"]].iloc[i]
+        # The first chunk (i == 0) is handled differently: First, the file will be newly created (mode "w"). Second, the
+        # header will be written. In all following cases (i >= 1), submissions will simply be appended (mode "a") and no
+        # header will be written anymore (not needed since it already exists because of the first chunk at i == 0).
+        first_chunk = i == 0
+        chunk_df.to_csv(overview_file, mode="w" if first_chunk else "a", header=first_chunk, index=False)
+    
     chunk_file = f"{args.submissions_file[:-4]}_{tutors_df['name'][i]}.zip"
     with zipfile.ZipFile(chunk_file, "w") as f:
         # Write all files from the submission directory to the tutors ZIP file. Must exclude directories, since glob
