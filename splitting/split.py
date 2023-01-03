@@ -178,15 +178,6 @@ else:
 print(f"distributing {len(submissions_df)} submissions among the following {len(tutors_df)} tutors:")
 print(tutors_df)
 for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"])):
-    if args.create_overview_file:
-        assert overview_file is not None
-        chunk_df[["tutor_name", "tutor_weight"]] = tutors_df[["name", "weight"]].iloc[i]
-        # The first chunk (i == 0) is handled differently: First, the file will be newly created (mode "w"). Second, the
-        # header will be written. In all following cases (i >= 1), submissions will simply be appended (mode "a") and no
-        # header will be written anymore (not needed since it already exists because of the first chunk at i == 0).
-        first_chunk = i == 0
-        chunk_df.to_csv(overview_file, mode="w" if first_chunk else "a", header=first_chunk, index=False)
-    
     chunk_file = f"{args.submissions_file[:-4]}_{tutors_df['name'][i]}.zip"
     with zipfile.ZipFile(chunk_file, "w") as f:
         # Write all files from the submission directory to the tutors ZIP file. Must exclude directories, since glob
@@ -201,6 +192,17 @@ for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"]
                     else:
                         name = file[len(unzip_dir) + 1:]
                     f.write(file, arcname=name)
+    
+    if args.create_overview_file:
+        assert overview_file is not None
+        chunk_df[["tutor_name", "tutor_weight"]] = tutors_df[["name", "weight"]].iloc[i]
+        chunk_df["tutor_file"] = os.path.basename(chunk_file)
+        # The first chunk (i == 0) is handled differently: First, the file will be newly created (mode "w"). Second, the
+        # header will be written. In all following cases (i >= 1), submissions will simply be appended (mode "a") and no
+        # header will be written anymore (not needed since it already exists because of the first chunk at i == 0).
+        first_chunk = i == 0
+        chunk_df.to_csv(overview_file, mode="w" if first_chunk else "a", header=first_chunk, index=False)
+    
     print(f"[{i + 1}/{len(tutors_df)}] {len(chunk_df):3d} submissions ---> "
           f"{get_file_path(chunk_file, args.print_abs_paths)}")
 
