@@ -142,6 +142,7 @@ if args.sorting_keys:
     info_df[FULL_NAME_COL] = info_df[first_name_col] + " " + info_df[last_name_col]
     merged_df = pd.merge(submissions_df, info_df, on=FULL_NAME_COL, how="inner")
     assert len(submissions_df) == len(merged_df)
+    print(f"sorting submissions according to: {', '.join(args.sorting_keys)}")
     submissions_df = merged_df.sort_values(by=args.sorting_keys)
 else:
     submissions_df.sort_values(SUBMISSION_COL, inplace=True)
