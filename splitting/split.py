@@ -50,7 +50,9 @@ parser.add_argument("--create_overview_file", action="store_true",
                     help="If specified, an overview CSV file will be created that contains all information on the "
                          "individual submissions and how they were distributed to the different tutors. This is useful "
                          "to quickly check which tutor corrected which submission. The name of the overview file will "
-                         "be the same as '--submissions_file' but with the extension replaced with '.csv'.")
+                         "be the same as '--submissions_file' but with the extension replaced with '.csv'. If "
+                         "'--info_file' was also specified, then all the information within this info file is also "
+                         "added to the overview CSV file.")
 parser.add_argument("--sorting_keys", type=str, nargs="+", default=[],
                     help="If specified, the submissions will be sorted according to these keys. The keys must be part "
                          "of the header entries in the '--info_file', so this argument must be specified in addition. "
@@ -151,7 +153,7 @@ submissions_df = get_submissions_df(os.listdir(unzip_dir), regex_cols={
     MOODLE_ID_COL: r"\d{7}",  # Extract the 7-digit Moodle ID according to the above format.
     SUBMISSION_COL: r".+",  # This is simply the entire submission (no specific extraction of a pattern).
 })
-if args.sorting_keys:
+if args.info_file:
     first_name_col = args.info_file_first_name_key
     last_name_col = args.info_file_last_name_key
     if first_name_col is None:
@@ -160,8 +162,10 @@ if args.sorting_keys:
     info_df[FULL_NAME_COL] = info_df[first_name_col] + " " + info_df[last_name_col]
     merged_df = pd.merge(submissions_df, info_df, on=FULL_NAME_COL, how="inner")
     assert len(submissions_df) == len(merged_df)
-    print(f"sorting submissions according to: {', '.join(args.sorting_keys)}")
-    submissions_df = merged_df.sort_values(by=args.sorting_keys)
+    if args.sorting_keys:
+        print(f"sorting submissions according to: {', '.join(args.sorting_keys)}")
+        merged_df.sort_values(by=args.sorting_keys, inplace=True)
+    submissions_df = merged_df
 else:
     submissions_df.sort_values(SUBMISSION_COL, inplace=True)
 
