@@ -1,3 +1,4 @@
+import itertools
 import math
 import os.path
 import re
@@ -67,36 +68,17 @@ def match_full_names(full_names: pd.Series, info_df: pd.DataFrame):
     # since a full name is just a space-separated string that starts with the first name and ends with the last name,
     # but both the first name and the last name might be multi-names, and there is no way of knowing to which a single
     # name element belongs. So we must find out by trying to match the full names to individual first and last names.
-    first_name_counts = defaultdict(int)
-    last_name_counts = defaultdict(int)
-    
-    for full_name in full_names:
-        for col in info_df.columns:
-            for elem in info_df[col]:
-                # Rather simple check for first names (this relies on the fact that the full names are a combination of
-                # first names followed by last names, and not the other way around).
-                if full_name.startswith(elem):
-                    first_name_counts[col] += 1
-                else:
-                    # We end up here if it is most likely not a first name. Might result in some false negatives, but
-                    # that's ok. The name part at index 0 is always part of the first name (again, this relies on the
-                    # fact that the full names are a combination of first names followed by last names, and not the
-                    # other way around), so we can immediately drop it here.
-                    name_parts = full_name.split(" ")
-                    assert len(name_parts) >= 2
-                    
-                    for name_part in name_parts[1:]:
-                        # Most likely, we will get some last name counts for the first name column (it is not uncommon
-                        # that a single name part also appears as first name), but overall, the actual last name column
-                        # count should be higher in the end.
-                        if elem.startswith(name_part):
-                            last_name_counts[col] += 1
-    
-    # Heuristic: Check counts to see which columns contain first/last names.
-    first_name_col = max(first_name_counts.items(), key=lambda key_val: key_val[1])[0]
-    last_name_col = max(last_name_counts.items(), key=lambda key_val: key_val[1])[0]
-    assert first_name_col != last_name_col
-    return first_name_col, last_name_col
+    # The idea here is to just try all possible 2-permutations of the info_df columns, chain the elements together with
+    # a space, and then checking whether these chained elements are the same as the full names. If so, the first column
+    # must be the one containing first names and the second column the one containing last names. Note: The more columns
+    # the info_df has, the more inefficient this heuristic becomes because of the permutations (however, we need the
+    # permutations since we do not know the order of the columns in info_df). With many columns, it is this highly
+    # recommended to manually provide the first name and last name columns.
+    for col1, col2 in itertools.permutations(info_df.columns, 2):
+        full_names_candidates = info_df[col1] + " " + info_df[col2]
+        if full_names.isin(full_names_candidates).all():
+            return col1, col2
+    raise ValueError("could not identify first name and last name columns")
 
 
 def weighted_chunks(df: pd.DataFrame, weights: Iterable):
