@@ -2,7 +2,7 @@ import itertools
 import math
 import os.path
 import re
-from collections import defaultdict
+from collections import namedtuple, defaultdict
 from collections.abc import Iterable, Sequence
 
 import numpy as np
@@ -74,11 +74,18 @@ def match_full_names(full_names: pd.Series, info_df: pd.DataFrame):
     # the info_df has, the more inefficient this heuristic becomes because of the permutations (however, we need the
     # permutations since we do not know the order of the columns in info_df). With many columns, it is this highly
     # recommended to manually provide the first name and last name columns.
+    Mismatch = namedtuple("Mismatch", ["col1", "col2", "df"])
+    closest_mismatch = None
     for col1, col2 in itertools.permutations(info_df.columns, 2):
         full_names_candidates = info_df[col1] + " " + info_df[col2]
-        if full_names.isin(full_names_candidates).all():
+        matching = full_names.isin(full_names_candidates)
+        if matching.all():
             return col1, col2
-    raise ValueError("could not identify first name and last name columns")
+        mismatching = full_names[~matching]
+        if closest_mismatch is None or len(mismatching) < len(closest_mismatch.df):
+            closest_mismatch = Mismatch(col1, col2, mismatching)
+    raise ValueError(f"could not identify first name and last name columns; closest mismatch for columns "
+                     f"'{closest_mismatch.col1}' and '{closest_mismatch.col2}':\n{closest_mismatch.df}")
 
 
 def weighted_chunks(df: pd.DataFrame, weights: Iterable):

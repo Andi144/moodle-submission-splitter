@@ -74,7 +74,11 @@ parser.add_argument("--info_file", type=str,
                          "sorting and renaming submissions. The CSV file must include a header, and these exact header "
                          "entries can be used as sort/renaming keys as defined by arguments '--sorting_keys' and "
                          "'--submission_renaming_keys', respectively. Typically, this is the course participants file "
-                         "that can be downloaded in the participants overview in Moodle.")
+                         "that can be downloaded in the participants overview in Moodle. Important: Please ensure that "
+                         "this file is consistent with the '--submissions_file' in the sense that they contain the "
+                         "same metadata. For instance, name changes might occur during a semester. When downloading "
+                         "this info file only once at the start of the semester, such changes are not reflected, and "
+                         "it would then be inconsistent to the up-to-day '--submissions_file', which leads to errors.")
 parser.add_argument("--info_file_first_name_key", type=str,
                     help="Only relevant if '--sorting_keys' is specified. If so, this argument indicates the header "
                          "entry in the '--info_file' which contains the first name. Must be specified together with "
