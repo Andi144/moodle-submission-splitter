@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 
 import pandas as pd
 
@@ -23,6 +24,14 @@ def get_missing_df(grading_file, tutors_overview_file):
     return merged_missing_df
 
 
+def extract_assignment_name(grading_file, tutors_overview_file, assignment_name_regex):
+    for s in (grading_file, tutors_overview_file):
+        match = re.search(assignment_name_regex, grading_file)
+        if match is not None:
+            return match.group()
+    return "assignment"
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--grading_files", nargs="+", type=str, required=True,
                     help="List of Moodle grading CSV files, each obtained via 'Download grading worksheet' (German: "
@@ -32,6 +41,11 @@ parser.add_argument("--tutors_overview_files", nargs="+", type=str, required=Tru
                     help="List of tutor overview CSV files, each obtained via the script 'split.py' with argument "
                          "'--create_overview_file' enabled. The order of this list must exactly match the order of "
                          "'--grading_files'.")
+parser.add_argument("--assignment_name_regex", type=str, default=r"Assignment \d+",
+                    help="Regular expression for extracting the assignment name out of every entry in"
+                         " '--grading_files' or, if no match is found, every entry in '--tutors_overview_files'. If no "
+                         "match is found here either, the string 'assignment' is used as fallback value. Default: "
+                         r"'Assignment \d+'")
 parser.add_argument("--print_missing", action="store_true",
                     help="If specified, all individual student submission where the feedback/grading is still missing "
                          "are printed to the console.")
@@ -65,8 +79,10 @@ for gf, tof in zip(args.grading_files, args.tutors_overview_files):
     print("-" * 75)
     mdf = get_missing_df(gf, tof)
     tutor_groups = mdf.groupby("tutor_name")
+    assignment_name = extract_assignment_name(gf_basename, tof_basename, args.assignment_name_regex)
+    
     for i, (tutor, group_df) in enumerate(tutor_groups):
-        print(f"[{i + 1}/{len(tutor_groups)}] {tutor}: {len(group_df)} missing assignment "
+        print(f"[{i + 1}/{len(tutor_groups)}] {tutor}: {len(group_df)} missing {assignment_name} "
               f"feedback{'' if len(group_df) == 1 else 's'}")
         if args.print_missing:
             # TODO: hard-coded column names
