@@ -64,8 +64,10 @@ for gf, tof in zip(args.grading_files, args.tutors_overview_files):
     print(f"Overview file: {tof_basename}")
     print("-" * 75)
     mdf = get_missing_df(gf, tof)
-    for i, (tutor, group_df) in enumerate(mdf.groupby("tutor_name")):
-        print(f"[{i + 1}] {tutor}: {len(group_df)} missing assignment feedback{'' if len(group_df) == 1 else 's'}")
+    tutor_groups = mdf.groupby("tutor_name")
+    for i, (tutor, group_df) in enumerate(tutor_groups):
+        print(f"[{i + 1}/{len(tutor_groups)}] {tutor}: {len(group_df)} missing assignment "
+              f"feedback{'' if len(group_df) == 1 else 's'}")
         if args.print_missing:
             # TODO: hard-coded column names
             print_df = group_df.reset_index(drop=True)
