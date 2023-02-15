@@ -67,6 +67,13 @@ for gf, tof in zip(args.grading_files, args.tutors_overview_files):
     for i, (tutor, group_df) in enumerate(mdf.groupby("tutor_name")):
         print(f"[{i + 1}] {tutor}: {len(group_df)} missing assignment feedback{'' if len(group_df) == 1 else 's'}")
         if args.print_missing:
-            # TODO: hard-coded column names (and may not even be there)
-            print(group_df[["Vorname", "Nachname", "ID-Nummer"]].reset_index(drop=True))
+            # TODO: hard-coded column names
+            print_df = group_df.reset_index(drop=True)
+            if "Vorname" in group_df and "Nachname" in group_df and "ID-Nummer" in group_df:
+                print_df.rename(columns={"Vorname": "first_name", "Nachname": "last_name", "ID-Nummer": "id"},
+                                inplace=True)
+                print_df = print_df[["first_name", "last_name", "id"]]
+                print(print_df)
+            else:
+                print(print_df)
     print("-" * 75)
