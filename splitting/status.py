@@ -26,7 +26,7 @@ def get_missing_df(grading_file, tutors_overview_file):
 
 def extract_assignment_name(grading_file, tutors_overview_file, assignment_name_regex):
     for s in (grading_file, tutors_overview_file):
-        match = re.search(assignment_name_regex, grading_file)
+        match = re.search(assignment_name_regex, s)
         if match is not None:
             return match.group()
     return "assignment"
