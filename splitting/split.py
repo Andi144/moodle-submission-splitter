@@ -16,7 +16,8 @@ SUBMISSION_COL = "submission_file"
 
 # TODO: encoding for every read and write access
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Script to split all Moodle submissions into batches that will be "
+                                             "assigned to a given list of tutors, according to their employment hours.")
 parser.add_argument("-sf", "--submissions_file", type=str, required=True,
                     help="Moodle ZIP file containing all submissions.")
 parser.add_argument("-n", "--number", type=int,

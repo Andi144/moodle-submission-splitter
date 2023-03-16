@@ -32,7 +32,9 @@ def extract_assignment_name(grading_file, tutors_overview_file, assignment_name_
     return "assignment"
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Script to check missing Moodle submission corrections (i.e., submissions "
+                                             "that still need to be graded), grouped by the tutors that were assigned "
+                                             "to perform these corrections (see script 'split.py').")
 parser.add_argument("--grading_files", nargs="+", type=str, required=True,
                     help="List of Moodle grading CSV files, each obtained via 'Download grading worksheet' (German: "
                          "'Bewertungstabelle herunterladen'). The order of this list must exactly match the order of "
