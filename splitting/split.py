@@ -166,7 +166,9 @@ if args.info_file:
         print(f"identified '{first_name_col}' as first name column and '{last_name_col}' as last name column")
     info_df[FULL_NAME_COL] = info_df[first_name_col] + " " + info_df[last_name_col]
     merged_df = pd.merge(submissions_df, info_df, on=FULL_NAME_COL, how="inner")
-    assert len(submissions_df) == len(merged_df)
+    no_duplicates = merged_df.drop_duplicates(subset=FULL_NAME_COL, keep=False)
+    duplicates = merged_df.loc[~merged_df.index.isin(no_duplicates.index)]
+    assert len(submissions_df) == len(merged_df), f"duplicate names detected:\n{duplicates}"
     if args.sorting_keys:
         print(f"sorting submissions according to: {', '.join(args.sorting_keys)}")
         merged_df.sort_values(by=args.sorting_keys, inplace=True)
