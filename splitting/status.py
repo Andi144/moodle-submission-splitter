@@ -20,7 +20,8 @@ def get_missing_df(grading_file, tutors_overview_file):
                               (grading_df["Bewertung kann geändert werden"] == "Nein"))]
     tutors_df = pd.read_csv(tutors_overview_file, dtype=str)
     merged_missing_df = pd.merge(missing_df, tutors_df, on="ID-Nummer")
-    assert len(missing_df) == len(merged_missing_df), "there are students not assigned to tutors"
+    unassigned_df = missing_df[~missing_df["ID-Nummer"].isin(merged_missing_df["ID-Nummer"])]
+    assert len(unassigned_df) == 0, f"there are students not assigned to tutors:\n{unassigned_df}"
     return merged_missing_df
 
 
