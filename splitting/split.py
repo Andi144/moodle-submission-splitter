@@ -99,7 +99,9 @@ if args.submission_renaming_keys and args.info_file is None:
 if args.sorting_keys and bool(args.info_file_first_name_key) != bool(args.info_file_last_name_key):
     raise ValueError("must specify either both or none of '--info_file_first_name_key' and 'info_file_last_name_key'")
 if args.info_file:
-    info_df = pd.read_csv(args.info_file)
+    # Read as string data type to avoid inconsistent states for IDs (most notably, matriculation IDs with leading zeros,
+    # where the zeros would be dropped here if the IDs were interpreted as integers)
+    info_df = pd.read_csv(args.info_file, dtype=str)
     
     
     def check_keys(keys, arg_name):
