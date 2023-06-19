@@ -13,7 +13,7 @@ def get_missing_df(grading_file, tutors_overview_file):
     # 2) "Status" contains "Keine Abgabe" (cannot be graded; it might be that is does contain a grade due to
     #    extraordinary circumstances, e.g., late submission which was not done via Moodle, but we are only interested
     #    in actually submitted entries that are not graded yet, so we can skip all these entries here)
-    # 3) "Bewertung kann geändert werden" equals "Nein" (was already graded, but the grading was done vis an alternative
+    # 3) "Bewertung kann geändert werden" equals "Nein" (was already graded, but the grading was done via an alternative
     #    CSV upload in Moodle, which, oddly enough, does not change the "Status")
     missing_df = grading_df[~(grading_df["Status"].str.contains(" - Bewertet") |
                               grading_df["Status"].str.contains("Keine Abgabe") |
