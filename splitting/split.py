@@ -208,7 +208,7 @@ for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"]
     
     if args.create_overview_file:
         assert overview_file is not None
-        chunk_df[["tutor_name", "tutor_weight"]] = tutors_df[["name", "weight"]].iloc[i]
+        chunk_df[["tutor_name", "tutor_weight"]] = tutors_df[["name", "weight"]].iloc[i].values
         chunk_df["tutor_file"] = os.path.basename(chunk_file)
         # The first chunk (i == 0) is handled differently: First, the file will be newly created (mode "w"). Second, the
         # header will be written. In all following cases (i >= 1), submissions will simply be appended (mode "a") and no
