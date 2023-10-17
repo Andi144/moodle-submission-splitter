@@ -192,7 +192,7 @@ else:
 print(f"distributing {len(submissions_df)} submissions among the following {len(tutors_df)} tutors:")
 print(tutors_df)
 for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"])):
-    chunk_file = f"{args.submissions_file[:-4]}_{tutors_df['name'][i]}.zip"
+    chunk_file = f"{args.submissions_file[:-4]}_{tutors_df['name'].iloc[i]}.zip"
     with zipfile.ZipFile(chunk_file, "w") as f:
         # Write all files from the submission directory to the tutors ZIP file. Must exclude directories, since glob
         # includes them. Also specify the relative path as name in the ZIP file (arcname), as otherwise, the full
