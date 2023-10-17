@@ -108,6 +108,7 @@ def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> list[pd.DataFrame]:
         chunks.append(df.iloc[idx:idx + chunk_size].copy())
         idx += chunk_size
     assert sum([len(c) for c in chunks]) == len(df)
+    assert len(chunks) == len(weights)
     return chunks
 
 
