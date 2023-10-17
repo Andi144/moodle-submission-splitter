@@ -12,7 +12,7 @@ import pandas as pd
 # TODO: handle empty tutors and submissions
 
 
-def extract_exercise_number(submissions_file: str, exercise_names: Iterable[str]):
+def extract_exercise_number(submissions_file: str, exercise_names: Iterable[str]) -> int:
     for ex_name in exercise_names:
         match = re.search(rf"{ex_name}[\s\-_]*(\d+)", os.path.basename(submissions_file))
         if match:
@@ -20,7 +20,7 @@ def extract_exercise_number(submissions_file: str, exercise_names: Iterable[str]
     raise ValueError("could not automatically infer exercise number, must specify manually via '-n'")
 
 
-def extract_weighted_tutors(tutors_list: Sequence[str]):
+def extract_weighted_tutors(tutors_list: Sequence[str]) -> pd.DataFrame:
     # Quick check to determine whether weights are specified.
     if "," in tutors_list[0]:
         rows = []
@@ -52,7 +52,7 @@ def handle_duplicate_names(tutors_df: pd.DataFrame):
     tutors_df.loc[dup, "name"] = [f"{dn} ({update_and_get_count(dn)})" for dn in dup_names]
 
 
-def get_submissions_df(submissions: Iterable[str], regex_cols: dict[str, str]):
+def get_submissions_df(submissions: Iterable[str], regex_cols: dict[str, str]) -> pd.DataFrame:
     data = defaultdict(list)
     for s in submissions:
         for name, regex in regex_cols.items():
@@ -63,7 +63,7 @@ def get_submissions_df(submissions: Iterable[str], regex_cols: dict[str, str]):
     return pd.DataFrame(data)
 
 
-def match_full_names(full_names: pd.Series, info_df: pd.DataFrame):
+def match_full_names(full_names: pd.Series, info_df: pd.DataFrame) -> tuple[str, str]:
     # Try to match the full names (given in the submissions) to separate first and last names. This is a bit tricky,
     # since a full name is just a space-separated string that starts with the first name and ends with the last name,
     # but both the first name and the last name might be multi-names, and there is no way of knowing to which a single
@@ -88,7 +88,7 @@ def match_full_names(full_names: pd.Series, info_df: pd.DataFrame):
                      f"'{closest_mismatch.col1}' and '{closest_mismatch.col2}':\n{closest_mismatch.df}")
 
 
-def weighted_chunks(df: pd.DataFrame, weights: Iterable):
+def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> list[pd.DataFrame]:
     # Scale weights to sum = 1.
     weights = np.array(weights, dtype=float) / sum(weights)
     chunk_sizes = [math.floor(len(df) * w) for w in weights]
@@ -111,5 +111,5 @@ def weighted_chunks(df: pd.DataFrame, weights: Iterable):
     return chunks
 
 
-def get_file_path(path: str, absolute: bool):
+def get_file_path(path: str, absolute: bool) -> str:
     return os.path.abspath(path) if absolute else os.path.basename(path)
