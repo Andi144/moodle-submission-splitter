@@ -217,7 +217,7 @@ for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"]
         first_chunk = i == 0
         chunk_df.to_csv(overview_file, mode="w" if first_chunk else "a", header=first_chunk, index=False)
     
-    print(f"[{i + 1}/{len(tutors_df)}] {len(chunk_df):3d} submissions ---> "
+    print(f"[{i + 1:{len(str(len(tutors_df)))}d}/{len(tutors_df)}] {len(chunk_df):3d} submissions ---> "
           f"{get_file_path(chunk_file, args.print_abs_paths)}")
 
 print(f"deleting extracted submissions directory '{get_file_path(unzip_dir, args.print_abs_paths)}'")
