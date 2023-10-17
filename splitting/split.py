@@ -170,7 +170,8 @@ if args.info_file:
     merged_df = pd.merge(submissions_df, info_df, on=FULL_NAME_COL, how="inner")
     no_duplicates = merged_df.drop_duplicates(subset=FULL_NAME_COL, keep=False)
     duplicates = merged_df.loc[~merged_df.index.isin(no_duplicates.index)]
-    assert len(submissions_df) == len(merged_df), f"duplicate names detected:\n{duplicates}"
+    if len(submissions_df) != len(merged_df):
+        raise ValueError(f"duplicate names detected:\n{duplicates}")
     if args.sorting_keys:
         print(f"sorting submissions according to: {', '.join(args.sorting_keys)}")
         merged_df.sort_values(by=args.sorting_keys, inplace=True)
