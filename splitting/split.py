@@ -191,7 +191,8 @@ else:
 
 print(f"distributing {len(submissions_df)} submissions among the following {len(tutors_df)} tutors:")
 print(tutors_df)
-for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"])):
+chunk_dfs, next_chunk_idx = weighted_chunks(submissions_df, tutors_df["weight"])
+for i, chunk_df in enumerate(chunk_dfs):
     chunk_file = f"{args.submissions_file[:-4]}_{tutors_df['name'].iloc[i]}.zip"
     with zipfile.ZipFile(chunk_file, "w") as f:
         # Write all files from the submission directory to the tutors ZIP file. Must exclude directories, since glob
@@ -220,5 +221,6 @@ for i, chunk_df in enumerate(weighted_chunks(submissions_df, tutors_df["weight"]
     print(f"[{i + 1:{len(str(len(tutors_df)))}d}/{len(tutors_df)}] {len(chunk_df):3d} submissions ---> "
           f"{get_file_path(chunk_file, args.print_abs_paths)}")
 
+print(f"next submission would distributed to: {tutors_df['name'].iloc[next_chunk_idx]}")
 print(f"deleting extracted submissions directory '{get_file_path(unzip_dir, args.print_abs_paths)}'")
 shutil.rmtree(unzip_dir, ignore_errors=True)

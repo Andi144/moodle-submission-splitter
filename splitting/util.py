@@ -88,7 +88,7 @@ def match_full_names(full_names: pd.Series, info_df: pd.DataFrame) -> tuple[str,
                      f"'{closest_mismatch.col1}' and '{closest_mismatch.col2}':\n{closest_mismatch.df}")
 
 
-def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> list[pd.DataFrame]:
+def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> tuple[list[pd.DataFrame], int]:
     # Scale weights to sum = 1.
     weights = np.array(weights, dtype=float) / sum(weights)
     chunk_sizes = [math.floor(len(df) * w) for w in weights]
@@ -101,6 +101,10 @@ def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> list[pd.DataFrame]:
         idx = (idx + 1) % len(chunk_sizes)
         remainder_size -= 1
     assert sum(chunk_sizes) == len(df)
+    # Remember the index of the next chunk that would have been assigned the next element (if there were any elements
+    # left to distribute). This is useful for assigning new elements at a later point in time, so one can directly
+    # continue at the correct index (=fair continuation of the additional element distribution).
+    next_chunk_idx = idx
     # Chunk sizes are all set, now simply collect each chunk from "df".
     chunks = []
     idx = 0
@@ -109,7 +113,7 @@ def weighted_chunks(df: pd.DataFrame, weights: Iterable) -> list[pd.DataFrame]:
         idx += chunk_size
     assert sum([len(c) for c in chunks]) == len(df)
     assert len(chunks) == len(weights)
-    return chunks
+    return chunks, next_chunk_idx
 
 
 def get_file_path(path: str, absolute: bool) -> str:
